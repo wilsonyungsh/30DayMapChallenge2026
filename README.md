@@ -5,6 +5,7 @@ Data and mapping works for the [#30DayMapChallenge](https://30daymapchallenge.co
 | Day | Theme  | Map                                                                                                                          | Script                                                     |
 | --- | ------ | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
 | 1   | Points | [Australia 2026 Meshblocks by Land Use](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day1_aus26_mb.html) | [Day1_abs_census_mb_pt.r](scripts/Day1_abs_census_mb_pt.r) |
+| 2   | Lines  | [Australia Water Transport Routes](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day2_aus_water_routes.html) | [Day2_route1_highway_line.r](scripts/Day2_route1_highway_line.r) |
 
 ---
 
@@ -48,3 +49,44 @@ Counted by Mesh Block, Australia looks residential. Measured by area, it's farml
 - **Data**: ABS ASGS Edition 2026 Mesh Blocks, via the `abs.geo` R package. Area is the ABS-supplied `area_albers_sqkm`.
 - **Mapping**: [`mapgl`](https://walker-data.com/mapgl/) (MapLibre GL JS) in R, exported with `htmlwidgets`.
 - **Script**: [scripts/Day1_abs_census_mb_pt.r](scripts/Day1_abs_census_mb_pt.r)
+
+---
+
+## Day 2 – Lines: Australia's Water Transport Routes
+
+🗺️ **[Open the interactive map](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day2_aus_water_routes.html)**
+
+![Australia water transport routes](images/2026Day2.png)
+
+Ferries, barges and other water-borne routes are an easily overlooked part of Australia's transport network. Day 2 maps every **water transport segment** in [Overture Maps](https://overturemaps.org/) that falls within an Australian state or territory.
+
+### What's on the map
+
+- **Lines**: each Overture `transportation/segment` with `subtype = 'water'`, clipped to Australian states and territories.
+- **Popup**: route name, state and length (km).
+- **Summary panels**: route count and total length by state (bottom-left), and the top 10 longest named routes (bottom-right).
+- The map opens zoomed in on the Berowra Waters ferry on the Hawkesbury River, NSW.
+
+### Many short hops vs a few long voyages
+
+| State              |  Routes | Length (km) |
+| ------------------ | ------: | ----------: |
+| Queensland         |      61 |       666.8 |
+| New South Wales    |      48 |        74.2 |
+| Western Australia  |      14 |       611.7 |
+| South Australia    |      13 |        21.1 |
+| Victoria           |      12 |       605.6 |
+| Tasmania           |       8 |       150.6 |
+| Northern Territory |       6 |     2,560.3 |
+| **Total**          | **162** | **4,690.3** |
+
+- **NSW** has the second-most routes (48) but only **74 km** in total: mostly short river and harbour crossings.
+- The **Northern Territory** has just **6 routes** but **2,560 km**, over half the national total, driven by long coastal routes across the Top End towards Western Australia.
+- **Victoria's** 606 km comes mostly from the Bass Strait crossing to Tasmania. A route that crosses a state border is counted in each state it touches.
+
+### Data & tools
+
+- **Data**: [Overture Maps](https://overturemaps.org/) transportation theme (latest release, read from the catalog at run time), queried straight from S3 with DuckDB (`spatial`, `httpfs`). The bounding box comes from `osmdata::getbb()`, and state boundaries are ABS ASGS 2026 states via `abs.geo`.
+- **Query**: [sql/road_extract_query.sql](sql/road_extract_query.sql)
+- **Mapping**: [`mapgl`](https://walker-data.com/mapgl/) (MapLibre GL JS) in R, exported with `htmlwidgets`.
+- **Script**: [scripts/Day2_route1_highway_line.r](scripts/Day2_route1_highway_line.r)
