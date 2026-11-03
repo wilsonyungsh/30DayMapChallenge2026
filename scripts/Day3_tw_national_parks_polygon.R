@@ -54,9 +54,9 @@ land_value <- c("Special Municipality", "Provincial City", "County")
 land_value_color <- c("#34eb83", "#cc6b21",  "#610fdb")
 legend_bg <- legend_style(background_color = "white", background_opacity = 1)
 
-
-maplibre(zoom = 5, pitch = 50, bearing = -15, center = view_pt,
-  projection = "mercator") |>
+mp <-
+  maplibre(zoom = 5, pitch = 50, bearing = -15, center = view_pt,
+    projection = "mercator") |>
   add_line_layer(id = "tw_whole_boundary",
     source = tw_incl_ocean |> st_boundary(),
     line_color = "blue", line_dasharray = c(6, 3), line_width = 2, line_cap = "round") |>
