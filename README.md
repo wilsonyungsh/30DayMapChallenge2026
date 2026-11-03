@@ -6,6 +6,7 @@ Data and mapping works for the [#30DayMapChallenge](https://30daymapchallenge.co
 | --- | ------ | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
 | 1   | Points | [Australia 2026 Meshblocks by Land Use](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day1_aus26_mb.html) | [Day1_abs_census_mb_pt.r](scripts/Day1_abs_census_mb_pt.r) |
 | 2   | Lines  | [Australia Water Transport Routes](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day2_aus_water_routes.html) | [Day2_route1_highway_line.r](scripts/Day2_route1_highway_line.r) |
+| 3   | Polygons | [Taiwan National Parks](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day3_tw_boundary_national_parks.html) | [Day3_tw_national_parks_polygon.R](scripts/Day3_tw_national_parks_polygon.R) |
 
 ---
 
@@ -90,3 +91,48 @@ Ferries, barges and other water-borne routes are an easily overlooked part of Au
 - **Query**: [sql/road_extract_query.sql](sql/road_extract_query.sql)
 - **Mapping**: [`mapgl`](https://walker-data.com/mapgl/) (MapLibre GL JS) in R, exported with `htmlwidgets`.
 - **Script**: [scripts/Day2_route1_highway_line.r](scripts/Day2_route1_highway_line.r)
+
+---
+
+## Day 3 – Polygons: Taiwan's National Parks
+
+🗺️ **[Open the interactive map](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day3_tw_boundary_national_parks.html)**
+
+![Taiwan national parks](images/2026Day3.png)
+
+Taiwan has nine national parks and one national nature park. Day 3 draws them as 3D polygons over Taiwan's cities and counties, from Yangmingshan in the north to Dongsha Atoll out in the South China Sea.
+
+### What's on the map
+
+- **Base polygons**: Taiwan's cities and counties (GADM level 2), coloured by type: Special Municipality, Provincial City or County.
+- **National parks**: extruded polygons, shaded from light to dark green by area. The area legend can be used to filter parks.
+- **Dashed blue line**: Taiwan's full administrative boundary from OpenStreetMap, including the surrounding sea.
+- **Popup**: park name and area (km²). A table of all parks by area sits in the top-right corner.
+
+### Most of the park area is sea
+
+| National park      | Area (km²) |
+| ------------------ | ---------: |
+| 東沙環礁國家公園 Dongsha Atoll | 3,618.3 |
+| 玉山國家公園 Yushan | 1,031.7 |
+| 太魯閣國家公園 Taroko | 980.3 |
+| 雪霸國家公園 Shei-Pa | 770.2 |
+| 台江國家公園 Taijiang | 368.5 |
+| 澎湖南方四島國家公園 South Penghu Marine | 354.5 |
+| 墾丁國家公園 Kenting | 329.4 |
+| 陽明山國家公園 Yangmingshan | 113.3 |
+| 金門國家公園 Kinmen | 36.7 |
+| 壽山國家自然公園 Shoushan (大小龜山園區 only) | 0.1 |
+| **Total** | **7,602.9** |
+
+- **Dongsha Atoll** is nearly half (48%) of all national park area, and almost all of it is coral reef and ocean.
+- The biggest land parks are the mountain parks along the Central Mountain Range: **Yushan**, **Taroko** and **Shei-Pa**.
+- **Shoushan** only shows 0.08 km² because Nominatim returns just one small section of the park (大小龜山園區), not the whole park.
+
+### Data & tools
+
+- **City/county boundaries**: [GADM](https://gadm.org/) level 2, via the `geodata` R package.
+- **National park and Taiwan boundaries**: OpenStreetMap, queried through the [Nominatim](https://nominatim.org/) search API with `httr2` (1 request per second, as the usage policy asks).
+- **Area**: calculated in UTM zone 51N (EPSG:32651).
+- **Mapping**: [`mapgl`](https://walker-data.com/mapgl/) (MapLibre GL JS) in R.
+- **Script**: [scripts/Day3_tw_national_parks_polygon.R](scripts/Day3_tw_national_parks_polygon.R)

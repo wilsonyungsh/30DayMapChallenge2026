@@ -6,6 +6,7 @@
 .RData
 .RDataTmp
 ASGS_DATA/
+tw_sf/
 
 # User-specific files
 .Ruserdata
