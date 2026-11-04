@@ -7,6 +7,7 @@ Data and mapping works for the [#30DayMapChallenge](https://30daymapchallenge.co
 | 1   | Points | [Australia 2026 Meshblocks by Land Use](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day1_aus26_mb.html) | [Day1_abs_census_mb_pt.r](scripts/Day1_abs_census_mb_pt.r) |
 | 2   | Lines  | [Australia Water Transport Routes](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day2_aus_water_routes.html) | [Day2_route1_highway_line.r](scripts/Day2_route1_highway_line.r) |
 | 3   | Polygons | [Taiwan National Parks](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day3_tw_boundary_national_parks.html) | [Day3_tw_national_parks_polygon.R](scripts/Day3_tw_national_parks_polygon.R) |
+| 4   | Clusters | [Where Industry Workers Live: Sydney, Melbourne & Brisbane](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day4_3gcc_top5_lisa.html) | [Day4_clustering.R](scripts/Day4_clustering.R) |
 
 ---
 
@@ -136,3 +137,53 @@ Taiwan has nine national parks and one national nature park. Day 3 draws them as
 - **Area**: calculated in UTM zone 51N (EPSG:32651).
 - **Mapping**: [`mapgl`](https://walker-data.com/mapgl/) (MapLibre GL JS) in R.
 - **Script**: [scripts/Day3_tw_national_parks_polygon.R](scripts/Day3_tw_national_parks_polygon.R)
+
+---
+
+## Day 4 – Clusters: Where Industry Workers Live in Sydney, Melbourne & Brisbane
+
+🗺️ **[Open the interactive map](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day4_3gcc_top5_lisa.html)**
+
+Do people who work in the same industry live near each other? Day 4 looks for residential hotspots of workers in the five largest industries across Australia's three biggest east-coast cities, using the 2021 Census.
+
+> **Note:** Census G56 counts employed people by **place of usual residence**, not place of work. These are clusters of where industry workers *live*, not where the jobs are.
+
+### What's on the map
+
+- **Polygons**: SA2s in Greater Sydney, Greater Melbourne and Greater Brisbane with more than 50 employed residents, coloured by Local Moran's I (LISA) cluster type: High-High (hotspot), Low-Low (coldspot), High-Low, Low-High or not significant (p ≥ 0.05).
+- **Industry switcher** (top right): one layer per industry, one shown at a time.
+- **City buttons** (bottom right): zoom to Brisbane, Melbourne or Sydney.
+- **Dashed line**: official Greater Capital City Statistical Area (GCCSA) boundaries.
+- **Popup**: SA2, city, resident workers in that industry, location quotient (LQ) and cluster type with its p-value.
+- **Summary table** (bottom left, draggable and collapsible): employed residents in each top-5 industry and their share of the city's total.
+
+### Method
+
+1. **Location quotient (LQ)** for each SA2 and industry: the industry's share of the SA2's employed residents, divided by its share across the whole city. LQ > 1 means the industry is over-represented among local residents.
+2. **Spatial weights**: 8 nearest neighbours by SA2 centroid (in EPSG:3577), row-standardised. Each city is analysed on its own, so a hotspot is relative to that city.
+3. **Global Moran's I** (999 permutations) for the overall strength of clustering, and **Local Moran's I** (`localmoran_perm`, 999 permutations) to locate hotspots and coldspots.
+
+### Same top 5 industries, different clustering
+
+All three cities share the same top 5 industries (by employed residents), which together make up about 53% of employed residents in each city. How strongly each one clusters differs:
+
+| Industry | Brisbane | Melbourne | Sydney |
+| -------- | -------: | --------: | -----: |
+| Professional, Scientific & Technical Services | 0.869 | 0.875 | 0.861 |
+| Construction | 0.750 | 0.713 | 0.623 |
+| Retail Trade | 0.573 | 0.512 | 0.650 |
+| Education & Training | 0.553 | 0.583 | 0.473 |
+| Health Care & Social Assistance | 0.321 | 0.536 | 0.551 |
+
+_Global Moran's I of LQ; all p = 0.001._
+
+- **Professional, Scientific & Technical Services** workers are the most clustered industry in every city (I ≈ 0.87). Around 40–45% of them live in hotspot SA2s, all in the inner city: New Farm and Paddington in Brisbane, North Sydney and Surry Hills in Sydney, Fitzroy and South Yarra in Melbourne.
+- **Construction** is the most clustered industry after that in Brisbane and Melbourne, but its hotspots sit on the outer suburban fringe (Logan Village and Jimboomba, Warragamba and The Oaks, Kinglake and Whittlesea), the mirror image of the professional services pattern.
+- **Health Care** is the largest industry everywhere (14–16% of employed residents) and the least clustered, especially in Brisbane (I = 0.32): hospitals and aged care are spread across the whole city, and so are the people who work in them.
+
+### Data & tools
+
+- **Data**: ABS Census of Population and Housing 2021, table G56 Industry of employment by occupation (SA2, place of usual residence), via the ABS Data API with `readabs`. SA2 and GCCSA 2021 boundaries via `strayr`.
+- **Spatial statistics**: `spdep` (k-nearest-neighbour weights, `moran.mc`, `localmoran_perm`).
+- **Mapping**: [`mapgl`](https://walker-data.com/mapgl/) (MapLibre GL JS, CARTO Voyager basemap) in R, exported with `htmlwidgets`.
+- **Script**: [scripts/Day4_clustering.R](scripts/Day4_clustering.R)
