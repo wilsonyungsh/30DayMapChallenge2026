@@ -15,6 +15,8 @@ Data and mapping works for the [#30DayMapChallenge](https://30daymapchallenge.co
 
 🗺️ **[Open the interactive map](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day1_aus26_mb.html)**
 
+![Australia 2026 Mesh Block centroids by land use](images/2026Day1.png)
+
 2026 is an Australian Census year, so Day 1 starts with the smallest building block of the census geography: the **Mesh Block (MB)** from the ABS Australian Statistical Geography Standard (ASGS) 2026.
 
 ### What's on the map
@@ -143,6 +145,8 @@ Taiwan has nine national parks and one national nature park. Day 3 draws them as
 ## Day 4 – Clusters: Where Industry Workers Live in Sydney, Melbourne & Brisbane
 
 🗺️ **[Open the interactive map](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day4_3gcc_top5_lisa.html)**
+
+![Education and Training resident worker clusters in Greater Brisbane](images/2026Day4.png)
 
 Do people who work in the same industry live near each other? Day 4 looks for residential hotspots of workers in the five largest industries across Australia's three biggest east-coast cities, using the 2021 Census.
 
