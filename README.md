@@ -8,6 +8,7 @@ Data and mapping works for the [#30DayMapChallenge](https://30daymapchallenge.co
 | 2   | Lines  | [Australia Water Transport Routes](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day2_aus_water_routes.html) | [Day2_route1_highway_line.r](scripts/Day2_route1_highway_line.r) |
 | 3   | Polygons | [Taiwan National Parks](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day3_tw_boundary_national_parks.html) | [Day3_tw_national_parks_polygon.R](scripts/Day3_tw_national_parks_polygon.R) |
 | 4   | Clusters | [Where Industry Workers Live: Sydney, Melbourne & Brisbane](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day4_3gcc_top5_lisa.html) | [Day4_clustering.R](scripts/Day4_clustering.R) |
+| 5   | Sense – Sight | [Can You See Brisbane CBD from Kenmore?](#day-5--sense--sight-can-you-see-brisbanes-cbd-from-kenmore) | — |
 
 ---
 
@@ -191,3 +192,37 @@ _Global Moran's I of LQ; all p = 0.001._
 - **Spatial statistics**: `spdep` (k-nearest-neighbour weights, `moran.mc`, `localmoran_perm`).
 - **Mapping**: [`mapgl`](https://walker-data.com/mapgl/) (MapLibre GL JS, CARTO Voyager basemap) in R, exported with `htmlwidgets`.
 - **Script**: [scripts/Day4_clustering.R](scripts/Day4_clustering.R)
+
+---
+
+## Day 5 – Sense – Sight: Can You See Brisbane's CBD from Kenmore?
+
+Can you see Brisbane's CBD from a street corner in Kenmore, about 10 km away? It depends on who you ask. Day 5 compares three views from the same spot on Kersley Road: a terrain viewshed, a 3D building model and a real photo.
+
+### 🏔️ The terrain says yes
+
+![HeyWhatsThat viewshed from Kersley Road, Kenmore](images/2026Day5_3.png)
+
+A viewshed from Kersley Road in [HeyWhatsThat](https://www.heywhatsthat.com/), with the observer height set to **2 m** (62 m above sea level). The line of sight towards the CBD (bearing **53°**, about **10 km**) just clears the ridges in between. The red patches show everywhere the bare ground is visible from that spot.
+
+### 🏙️ The 3D model says yes, mostly
+
+![3D building view from Kersley Road towards the Brisbane CBD](images/2026Day5_1.png)
+
+Add buildings and the skyline is still there, sitting neatly above the rooftops of the western suburbs.
+
+### 📷 My eyes say: just a little
+
+![Photo from Kersley Road, Kenmore, with the CBD skyline just visible over a roof](images/2026Day5_2.jpg)
+
+The real photo has something both models leave out: **trees**. Hedges, gum trees and power lines hide most of the view. All that's left is a thin strip of towers peeking over a neighbour's roof.
+
+### Takeaway
+
+Each layer adds another set of obstacles, and the view gets smaller each time. Sight analysis is only as good as what you put into the model. Terrain is easy, buildings are getting easier, but vegetation is still the missing layer in most digital twins.
+
+### Data & tools
+
+- **Viewshed**: [HeyWhatsThat](https://www.heywhatsthat.com/), observer at Kersley Road, Kenmore, 2 m above ground.
+- **3D view**: [Mapbox](https://www.mapbox.com/) 3D buildings and terrain.
+- **Photo**: taken on Kersley Road, Kenmore.
