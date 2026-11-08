@@ -9,6 +9,7 @@ Data and mapping works for the [#30DayMapChallenge](https://30daymapchallenge.co
 | 3   | Polygons | [Taiwan National Parks](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day3_tw_boundary_national_parks.html) | [Day3_tw_national_parks_polygon.R](scripts/Day3_tw_national_parks_polygon.R) |
 | 4   | Clusters | [Where Industry Workers Live: Sydney, Melbourne & Brisbane](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day4_3gcc_top5_lisa.html) | [Day4_clustering.R](scripts/Day4_clustering.R) |
 | 5   | Sense – Sight | [Can You See Brisbane CBD from Kenmore?](#day-5--sense--sight-can-you-see-brisbanes-cbd-from-kenmore) | — |
+| 7   | 10-Minute Map | [Brisbane Bushfire Risk & Travel Time from the CBD](#day-7--10-minute-map-brisbane-bushfire-risk--travel-time-from-the-cbd) | — |
 
 ---
 
@@ -226,3 +227,27 @@ Each layer adds another set of obstacles, and the view gets smaller each time. S
 - **Viewshed**: [HeyWhatsThat](https://www.heywhatsthat.com/), observer at Kersley Road, Kenmore, 2 m above ground.
 - **3D view**: [Mapbox](https://www.mapbox.com/) 3D buildings and terrain.
 - **Photo**: taken on Kersley Road, Kenmore.
+
+---
+
+## Day 7 – 10-Minute Map: Brisbane Bushfire Risk & Travel Time from the CBD
+
+![Brisbane bushfire risk with 45-minute public transport and 30-minute drive isochrones from the CBD](images/2026Day7.jpg)
+
+A 10-minute map, made from the QGIS project I used for house hunting when I first moved to Brisbane three years ago. The data was all still there, so the work was choosing what to leave out. I kept just two themes:
+
+- 🔥 **Bushfire risk**: Brisbane City Council's bushfire intensity layers, from very high potential intensity down to the potential impact buffer.
+- 🚆 **Travel time from the CBD**: a 45-minute public transport isochrone (green) and a 30-minute drive isochrone (dashed blue).
+
+### Why bushfire, not flood?
+
+In Brisbane, everyone talks about flood risk, but bushfire risk hardly comes up. One real estate agent told me that in his whole career selling in Brisbane, no one had ever asked him about it.
+
+On the map, most of the **very high** bushfire risk in the west sits right at the edge of the 45-minute public transport zone, where the suburbs meet the bush. The leafy, quieter suburbs many people want to live in come with that risk.
+
+### Data & tools
+
+- **Bushfire risk**: [Brisbane City Council Open Data Portal](https://data.brisbane.qld.gov.au/), collected three years ago.
+- **Isochrones**: [TravelTime API](https://traveltime.com/), 45 minutes by public transport and 30 minutes by car from the CBD, collected three years ago.
+- **Mapping**: QGIS.
+- **Map export**: [maps/day7_10minutesMap.tiff](maps/day7_10minutesMap.tiff)
