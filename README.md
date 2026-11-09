@@ -259,6 +259,8 @@ On the map, most of the **very high** bushfire risk in the west sits right at th
 
 🗺️ **[Open the interactive map](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day9_urban_rural.html)**
 
+![Kaohsiung urban and non-urban planning framework](images/2026Day9.jpeg)
+
 Taiwan's land-use planning splits land in two: **urban** (都市土地) and **non-urban** (非都市土地). Inside the urban half there are three kinds of plan: **master plans** (主要計畫), **urban plans** (都市計畫) and **special district plans** (特定區計畫). Day 9 puts all of them on one map for Kaohsiung, so you can see where each type of plan actually applies.
 
 ### What's on the map
