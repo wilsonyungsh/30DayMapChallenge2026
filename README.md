@@ -10,7 +10,7 @@ Data and mapping works for the [#30DayMapChallenge](https://30daymapchallenge.co
 | 4   | Clusters | [Where Industry Workers Live: Sydney, Melbourne & Brisbane](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day4_3gcc_top5_lisa.html) | [Day4_clustering.R](scripts/Day4_clustering.R) |
 | 5   | Sense – Sight | [Can You See Brisbane CBD from Kenmore?](#day-5--sense--sight-can-you-see-brisbanes-cbd-from-kenmore) | — |
 | 7   | 10-Minute Map | [Brisbane Bushfire Risk & Travel Time from the CBD](#day-7--10-minute-map-brisbane-bushfire-risk--travel-time-from-the-cbd) | — |
-| 9   | Urban vs Rural | [Kaohsiung's Planning Framework: Urban vs Non-urban](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day9_urban_rural.html) | [Day9_Urban_vs_Rural.R](scripts/Day9_Urban_vs_Rural.R) |
+| 9   | Urban–Rural | [Kaohsiung's Planning Framework: Urban vs Non-urban](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day9_urban_rural.html) | [Day9_Urban_vs_Rural.R](scripts/Day9_Urban_vs_Rural.R) |
 
 ---
 
@@ -255,13 +255,19 @@ On the map, most of the **very high** bushfire risk in the west sits right at th
 
 ---
 
-## Day 9 – Urban vs Rural: Kaohsiung's Planning Framework
+## Day 9 – Urban–Rural: Kaohsiung's Planning Framework
 
 🗺️ **[Open the interactive map](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day9_urban_rural.html)**
 
 ![Kaohsiung urban and non-urban planning framework](images/2026Day9.jpeg)
 
-Taiwan's land-use planning splits land in two: **urban** (都市土地) and **non-urban** (非都市土地). Inside the urban half there are three kinds of plan: **master plans** (主要計畫), **urban plans** (都市計畫) and **special district plans** (特定區計畫). Day 9 puts all of them on one map for Kaohsiung, so you can see where each type of plan actually applies.
+"Urban" and "rural" can mean many things. Day 9 uses a planner's definition, from my days at NCKU's Department of Urban Planning (成大都計系). I was always confused by how Taiwan's planning system fits together. Here is how I understand it, from top to bottom:
+
+- 🇹🇼 **National level**: the Comprehensive National Land Development Plan (國土綜合開發計畫). It sets direction, but it is guidance only, with no legal effect.
+- 🗺️ **Regional level**: Regional Plans (區域計畫). Non-urban land use control (非都市土地使用分區) sits here. The whole system will be replaced when the new National Spatial Planning Act (國土計畫法) takes effect in 2031.
+- 🏘️ **Local level**: urban land is covered by urban plans (都市計畫), master plans (主要計畫), detailed plans (細部計畫) and special district plans (特定區計畫).
+
+So the line between urban and rural in Taiwan is a **legal line**, not a measure of population density or appearance: does the land sit inside an urban plan or not? The map draws that line for my hometown, Kaohsiung (高雄), with each plan type in a different colour. Detailed plans are not mapped.
 
 ### What's on the map
 
@@ -281,7 +287,7 @@ Taiwan's land-use planning splits land in two: **urban** (都市土地) and **no
 - **Master Plan**: one plan area, 高雄市主要計畫. It has by far the most zones of any plan area (10,449).
 - **Urban Plans**: the 20 town and district plans, such as Fengshan 鳳山, Gangshan 岡山 and Meinong 美濃.
 - **Special District Plans**: 11 plans for areas with a particular purpose, such as scenic areas (月世界, 美濃湖), fishing port areas (興達港, 蚵子寮), freeway interchange areas, the Kaohsiung New Town and the Multi-functional Economic and Trade Park.
-- **Non-urban land** has far fewer zone categories (10) than any urban plan type, because it is classified by broad land use rather than by detailed zoning.
+- **Non-urban land** covers most of the city's area, mostly the inland mountains, yet has just 10 zone types. One master plan alone has 402. The level of detail tells its own story.
 
 > **Note:** Zone names are not standardised across plan areas, so "distinct zone names" overstates how many different zone types there really are.
 
