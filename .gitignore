@@ -6,6 +6,7 @@
 .RData
 .RDataTmp
 ASGS_DATA/
+data/
 tw_sf/
 
 # User-specific files

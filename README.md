@@ -10,6 +10,7 @@ Data and mapping works for the [#30DayMapChallenge](https://30daymapchallenge.co
 | 4   | Clusters | [Where Industry Workers Live: Sydney, Melbourne & Brisbane](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day4_3gcc_top5_lisa.html) | [Day4_clustering.R](scripts/Day4_clustering.R) |
 | 5   | Sense – Sight | [Can You See Brisbane CBD from Kenmore?](#day-5--sense--sight-can-you-see-brisbanes-cbd-from-kenmore) | — |
 | 7   | 10-Minute Map | [Brisbane Bushfire Risk & Travel Time from the CBD](#day-7--10-minute-map-brisbane-bushfire-risk--travel-time-from-the-cbd) | — |
+| 9   | Urban vs Rural | [Kaohsiung's Planning Framework: Urban vs Non-urban](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day9_urban_rural.html) | [Day9_Urban_vs_Rural.R](scripts/Day9_Urban_vs_Rural.R) |
 
 ---
 
@@ -251,3 +252,48 @@ On the map, most of the **very high** bushfire risk in the west sits right at th
 - **Isochrones**: [TravelTime API](https://traveltime.com/), 45 minutes by public transport and 30 minutes by car from the CBD, collected three years ago.
 - **Mapping**: QGIS.
 - **Map export**: [maps/day7_10minutesMap.tiff](maps/day7_10minutesMap.tiff)
+
+---
+
+## Day 9 – Urban vs Rural: Kaohsiung's Planning Framework
+
+🗺️ **[Open the interactive map](https://wilsonyungsh.github.io/interactive/30DayMapChallenge2026/day9_urban_rural.html)**
+
+Taiwan's land-use planning splits land in two: **urban** (都市土地) and **non-urban** (非都市土地). Inside the urban half there are three kinds of plan: **master plans** (主要計畫), **urban plans** (都市計畫) and **special district plans** (特定區計畫). Day 9 puts all of them on one map for Kaohsiung, so you can see where each type of plan actually applies.
+
+### What's on the map
+
+- **Polygons**: every urban plan area published by Kaohsiung City Government (32 plan areas, 24,292 zones) plus the non-urban land use zones (4,470 zones), coloured by plan type.
+- **Legend** (top left, bilingual, draggable and collapsible): Master Plan 主要計畫, Urban Plan 都市計畫, Special District Plan 特定區計畫 and Non-urban Land Use 非都市土地使用分區.
+- **Summary table** (bottom left, bilingual, draggable and collapsible): the planning framework with the number of plan areas and distinct zone names in each type, and the data sources.
+
+### The framework in numbers
+
+| Plan type | Land | Plan areas | Distinct zone names |
+| --------- | ---- | ---------: | ------------------: |
+| Master Plan 主要計畫 | Urban 都市土地 | 1 | 402 |
+| Urban Plan 都市計畫 | Urban 都市土地 | 20 | 265 |
+| Special District Plan 特定區計畫 | Urban 都市土地 | 11 | 274 |
+| Non-urban Land Use 非都市土地使用分區 | Rural 非都市土地 | 1 | 10 |
+
+- **Master Plan**: one plan area, 高雄市主要計畫. It has by far the most zones of any plan area (10,449).
+- **Urban Plans**: the 20 town and district plans, such as Fengshan 鳳山, Gangshan 岡山 and Meinong 美濃.
+- **Special District Plans**: 11 plans for areas with a particular purpose, such as scenic areas (月世界, 美濃湖), fishing port areas (興達港, 蚵子寮), freeway interchange areas, the Kaohsiung New Town and the Multi-functional Economic and Trade Park.
+- **Non-urban land** has far fewer zone categories (10) than any urban plan type, because it is classified by broad land use rather than by detailed zoning.
+
+> **Note:** Zone names are not standardised across plan areas, so "distinct zone names" overstates how many different zone types there really are.
+
+### Method
+
+1. Scrape the download list from the Kaohsiung Urban Development Bureau open data page (33 shapefiles over 2 pages) and download them all.
+2. Drop 高雄市更新地區範圍圖 (urban renewal areas), which is not an urban plan area.
+3. Reproject everything to TWD97 / TM2 zone 121 (EPSG:3826) and stack the layers into one dataset.
+4. Classify each plan area from its name: 主要計畫 → Master Plan, 特定區計畫 → Special District Plan, 都市計畫 → Urban Plan. Everything else in the non-urban layer is Rural.
+
+### Data & tools
+
+- **Urban plans**: [Kaohsiung City Government Urban Development Bureau open data platform](https://urbangisdata.kcg.gov.tw/ODA/web_page/ODA020100.jsp) (高雄市政府都市發展局資料開放平台), urban plan area shapefiles.
+- **Non-urban land use zones**: 非都市土地使用分區_高雄市, from the [Open Data Portal](https://odportal.tw/) (odportal.tw).
+- **Spatial processing**: `sf`, `dplyr`, `httr`.
+- **Mapping**: [`mapgl`](https://walker-data.com/mapgl/) (MapLibre GL JS) in R, exported with `htmlwidgets`. The summary table is a custom control with inline event handlers for dragging and collapsing.
+- **Script**: [scripts/Day9_Urban_vs_Rural.R](scripts/Day9_Urban_vs_Rural.R). It downloads all the data and builds the map. The shapefile zips use Big5 file names that R's `unzip()` can't read, so the script unzips with macOS `ditto`.
