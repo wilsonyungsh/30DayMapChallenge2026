@@ -345,7 +345,7 @@ Countries reachable from each capital (Australia itself not counted), October an
 
 - **Brisbane vs Sydney and Melbourne**: Brisbane reaches 13 countries directly, behind Sydney (19) and Melbourne (15). With one stop the gap almost disappears: 67 countries, against 84 and 77.
 - **One stop changes everything**: even Adelaide, with only 4 direct countries, can reach 56 with one connection. A hub airport matters more than the number of direct flights.
-- **Zeros are not a bug**: Canberra, Hobart and Darwin had no international flights in late 2022, so they can only reach places by connecting through another Australian city. Hobart and Darwin show 0 because no connection appears in this data.
+- **Zeros are a data gap**: Canberra, Hobart and Darwin show no international flights in this data (it only catches airline-style flights above the 8-flight threshold), so they only reach places by connecting through another Australian city. Hobart and Darwin show no such connection either, so they read 0.
 
 > **Note:** "1 stop only" and "direct" can both include the same country. For example, you can fly directly to Los Angeles but need a stop to reach New York, so the US appears in both.
 
