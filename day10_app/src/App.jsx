@@ -8,13 +8,15 @@ import world from 'world-atlas/countries-110m.json';
 import data from './data.json';
 import './style.css';
 
-const ORIGINS = [
+const ORIGINS_ALL = [
   ['SYD', 'Sydney'], ['MEL', 'Melbourne'], ['BNE', 'Brisbane'], ['PER', 'Perth'],
   ['ADL', 'Adelaide'], ['CBR', 'Canberra'], ['HBA', 'Hobart'], ['DRW', 'Darwin'], ['CNS', 'Cairns'],
 ];
-const NAME = Object.fromEntries(ORIGINS);
 const A = data.airports.map(([iata, name, city, country, lat, lon, cid]) => ({ iata, name, city, country, lat, lon, cid }));
 const IDX = new Map(A.map((a, i) => [a.iata, i]));
+// only offer departure cities that exist in the data, so a missing airport can never break the page
+const ORIGINS = ORIGINS_ALL.filter(([c]) => IDX.has(c));
+const NAME = Object.fromEntries(ORIGINS);
 const adj = A.map(() => new Set());
 data.routes.forEach(([s, d]) => { adj[s].add(d); adj[d].add(s); });
 const countries = feature(world, world.objects.countries).features.filter((f) => f.id !== '010');
@@ -240,7 +242,7 @@ function App() {
   useEffect(() => {
     if (!ready) return;
     marker.current.setLngLat([o.lon, o.lat]);
-    marker.current.getElement().textContent = o.city;
+    marker.current.getElement().textContent = NAME[origin];
     map.current.easeTo({ ...home(scope, o), duration: 1200 });
   }, [ready, origin, scope]);
 
@@ -361,7 +363,7 @@ function App() {
             <li><b>Coverage gaps:</b> ADS-B receivers are volunteer-run, so flights over oceans, Africa and parts of Asia are caught less often, and some real routes fall below the threshold.</li>
             <li><b>Globe:</b> lines are great-circle arcs drawn on a MapLibre globe, so they show shape, not actual flight paths.</li>
             <li><b>Domestic only:</b> both flights of a one-stop trip stay inside Australia. State capitals and regional airports only appear if airline-style flights were seen there.</li>
-            <li><b>Cairns:</b> OpenSky has no flight records for Cairns airport, so its routes come from the older OpenFlights file (2014) and may be out of date. They connect to airports that appear in the 2022 data.</li>
+            <li><b>Cairns, Darwin and Hobart:</b> OpenSky has no flight records for these airports, so their routes come from the older OpenFlights file (2014) and may be out of date. They connect to airports that appear in the 2022 data.</li>
             <li><b>Return flights assumed:</b> a route A to B is treated as also B to A.</li>
             <li><b>One stop means one connection:</b> "1 stop only" lists airports with no direct flight but a one-connection route.  any two routes sharing an airport. Layover time, separate tickets, visas and baggage transfers are ignored, and domestic hubs (e.g. via Sydney) count as stops.</li>
 <li><b>Countries</b> follow the airport's ISO country code (OurAirports), so territories (e.g. Guam, Réunion) count as separate countries.</li>

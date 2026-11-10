@@ -34,9 +34,9 @@ for (const f of FILES) {
   console.log(f, 'done');
 }
 const edges = [...counts].filter(([, n]) => n >= MIN_FLIGHTS).map(([k]) => k.split('|'));
-// Cairns (YBCS) has no records in the OpenSky files (no ADS-B coverage there), so its routes come from
+// Cairns (YBCS), Darwin (YPDN) and Hobart (YMHB) have no records in the OpenSky files (no ADS-B coverage there), so its routes come from
 // the older OpenFlights route file (2014), keeping only airports already in the OpenSky network.
-const SUPPLEMENT = { YBCS: 'CNS' };
+const SUPPLEMENT = { YBCS: 'CNS', YPDN: 'DRW', YMHB: 'HBA' };
 const byIata = new Map([...apt].map(([icao, r]) => [r.iata_code, icao]));
 const inNet = new Set(edges.flat());
 const supplement = {};

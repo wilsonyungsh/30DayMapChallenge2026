@@ -341,29 +341,30 @@ Countries reachable from each city (Australia itself not counted), October and N
 | Perth | 9 | 71 | 72 |
 | Adelaide | 4 | 55 | 56 |
 | Canberra | 0 | 21 | 21 |
-| Hobart | 0 | 0 | 0 |
-| Darwin | 0 | 0 | 0 |
+| Hobart* | 0 | 21 | 21 |
+| Darwin* | 2 | 30 | 30 |
 | Cairns* | 3 | 36 | 37 |
 
-*Cairns has no flights in the OpenSky data, so its routes come from the 2014 OpenFlights file (see the limitations).
+*OpenSky has no flights for Hobart, Darwin and Cairns, so their routes come from the 2014 OpenFlights file (see the limitations).
 
 Domestic only, Australian airports reachable (one stop means both flights stay in Australia):
 
 | From | Direct | 1 stop only |
 | ---- | -----: | ----------: |
-| Sydney | 24 | 13 |
-| Melbourne | 13 | 24 |
-| Brisbane | 14 | 22 |
-| Perth | 11 | 25 |
-| Adelaide | 15 | 21 |
-| Canberra | 8 | 28 |
-| Cairns* | 6 | 29 |
+| Sydney | 26 | 13 |
+| Melbourne | 15 | 24 |
+| Brisbane | 16 | 22 |
+| Perth | 12 | 26 |
+| Adelaide | 16 | 22 |
+| Canberra | 8 | 30 |
+| Hobart* | 3 | 26 |
+| Darwin* | 5 | 32 |
+| Cairns* | 6 | 31 |
 
-With one stop almost the whole domestic network (36 airports) is reachable from every city that has any flights in the data, so the interesting domestic number is the direct one.
-
-- **Brisbane vs Sydney and Melbourne**: Brisbane reaches 13 countries directly, behind Sydney (19) and Melbourne (15). With one stop the gap almost disappears: 67 countries, against 84 and 77.
+- **Brisbane vs Sydney and Melbourne**: Brisbane reaches 13 countries directly, behind Sydney (19) and Melbourne (15). With one stop the gap narrows: 67 countries, against 84 and 77.
 - **One stop changes everything**: even Adelaide, with only 4 direct countries, can reach 56 with one connection. A hub airport matters more than the number of direct flights.
-- **Zeros are a data gap**: Canberra, Hobart and Darwin show no international flights in this data (it only catches airline-style flights above the 8-flight threshold), so they only reach places by connecting through another Australian city. Hobart and Darwin show no such connection either, so they read 0.
+- **Domestic is nearly saturated**: with one stop almost the whole domestic network (39 airports) is reachable from every city, so the interesting domestic number is the direct one.
+- **Canberra** has no international flights in this data, so everything it reaches abroad is through another Australian city.
 
 > **Note:** "1 stop only" and "direct" can both include the same country. For example, you can fly directly to Los Angeles but need a stop to reach New York, so the US appears in both.
 
@@ -383,7 +384,7 @@ With one stop almost the whole domestic network (36 airports) is reachable from 
 - **Observed, not scheduled**: origin and destination airports are inferred from each flight's track, so a few pairs will be wrong or missing. ADS-B receivers are run by volunteers, so coverage is thinner over oceans, Africa and parts of Asia.
 - **Not today's timetable**: late 2022 was still the post-COVID recovery. Routes added or dropped since are not reflected, so today's counts will be higher.
 - **One stop is only a connection**: any two routes that share an airport count. Layover time, separate tickets, visas and baggage transfers are ignored. Domestic hubs, such as flying via Sydney, count as stops.
-- **Cairns is patched**: OpenSky has no flight records for Cairns airport (no ADS-B coverage), so its 10 routes come from the older OpenFlights file (2014) and only link to airports that appear in the 2022 data. Treat Cairns as indicative.
+- **Cairns, Darwin and Hobart are patched**: OpenSky has no flight records for these airports (no ADS-B coverage), so their routes (10, 7 and 3) come from the older OpenFlights file (2014) and only link to airports that appear in the 2022 data. Treat them as indicative.
 - **Countries** follow the ISO code, so territories such as Guam or New Caledonia count as separate countries.
 - **Tools**: React, d3 (great-circle arcs and distances), MapLibre GL JS (globe), `topojson-client`, `esbuild`.
 - **Code**: [day10_app/](day10_app/). `node prep_opensky.mjs` turns the OpenSky and OurAirports files (in `data/day10_opensky/`) into JSON, and `node build.mjs` bundles everything into [maps/day10_flights.html](maps/day10_flights.html).
