@@ -306,14 +306,66 @@ So the line between urban and rural in Taiwan is a **legal line**, not a measure
 - **Mapping**: [`mapgl`](https://walker-data.com/mapgl/) (MapLibre GL JS) in R, exported with `htmlwidgets`. The summary table is a custom control with inline event handlers for dragging and collapsing.
 - **Script**: [scripts/Day9_Urban_vs_Rural.R](scripts/Day9_Urban_vs_Rural.R). It downloads all the data and builds the map. The shapefile zips use Big5 file names that R's `unzip()` can't read, so the script unzips with macOS `ditto`.
 
-## Day 10 - Prompt only: Where is your one-stop vacation?
+## Day 10 – Prompt Only: Where Is Your One-Stop Vacation?
 
-An interactive globe built with React, d3 and MapLibre GL JS from real observed flight data. Pick an Australian capital city and choose direct flights, up to one stop, or one stop only, and the globe shows every country and airport you can reach.
+🗺️ **Open the map**: [maps/day10_flights.html](maps/day10_flights.html) (one self-contained file, no server needed)
 
-- **Open**: [maps/day10_flights.html](maps/day10_flights.html) (self-contained, no server needed).
-- **Questions it answers**: how many countries you can fly to directly from Brisbane, how that compares with Sydney and Melbourne (and the other capitals), and where one stop gets you.
-- **Hover and fly**: airports glow on hover. Click one and press "Fly this route" to watch a small plane follow the route (choose the transfer airport if there are several) while the camera tracks it. Switch between a **Follow** camera and a first-person **Cockpit** view (with a heading readout), and between a **Map** and a **Satellite** basemap (Esri World Imagery tiles, needs internet).
-- **One-stop lines**: blue lines are departure to transfer airport, amber lines are transfer airport to final destination. Click a dot to see its connections.
-- **Source**: [OpenSky Network](https://zenodo.org/records/7923702) observed flights (October and November 2022), airports from [OurAirports](https://ourairports.com/data/), borders from Natural Earth via `world-atlas`.
-- **Limitations**: two months of 2022 data (post-COVID recovery), a route is any airport pair with 8 or more airline-style flights, ADS-B coverage is patchy, and a one-stop trip ignores layover times, separate tickets and visas.
-- **Build**: source in [day10_app/](day10_app/). `node prep_opensky.mjs` turns the OpenSky and OurAirports files (in `data/day10_opensky/`) into JSON, and `node build.mjs` bundles everything into the single HTML file.
+![Flights reachable from Brisbane with up to one stop](images/2026Day10.png)
+
+Day 10 is "prompt only": I wrote a short brief and let Claude build the map. The brief asked for an interactive map, using React and d3, of real flight route data that answers a simple question: **how many countries can I fly to from Brisbane, directly or with one stop, and how does that compare with Sydney and Melbourne?**
+
+The result is a 3D globe (MapLibre GL JS) where you pick an Australian capital city and a number of stops, and see everywhere you can get to.
+
+### What's on the map
+
+- **Departure city**: Sydney, Melbourne, Brisbane, Perth, Adelaide, Canberra, Hobart or Darwin.
+- **Stops**: *Direct only*, *Up to 1 stop*, or *1 stop only* (places with no direct flight but a one-connection route).
+- **Statistics**: how many countries and airports you can reach, in a sentence such as "from Brisbane you can reach 13 countries directly".
+- **City comparison**: a bar chart ranks all eight capitals for the stop option you chose. Click a bar to switch cities.
+- **Blue and amber lines**: blue lines run from the departure city to a direct destination or a transfer airport, and amber lines run from the transfer airport to the final destination. I deliberately don't draw departure to final destination, because that is not how you would fly.
+- **Hover**: airports glow and a tooltip shows the airport, the country and where you would transfer.
+- **Fly this route**: click an airport, press the button and a small plane flies the route. If there are several transfer options you can choose one.
+- **Follow and Cockpit cameras**: *Follow* tracks the plane from above. *Cockpit* is a first-person view that turns with the plane, with a heading readout.
+- **Map and Satellite basemaps**: the satellite option uses Esri imagery and needs an internet connection.
+
+### The comparison in numbers
+
+Countries reachable from each capital (Australia itself not counted), October and November 2022:
+
+| From | Direct | 1 stop only | Up to 1 stop |
+| ---- | -----: | ----------: | -----------: |
+| Sydney | 19 | 81 | 84 |
+| Melbourne | 15 | 75 | 77 |
+| Brisbane | 13 | 66 | 67 |
+| Perth | 9 | 71 | 72 |
+| Adelaide | 4 | 55 | 56 |
+| Canberra | 0 | 21 | 21 |
+| Hobart | 0 | 0 | 0 |
+| Darwin | 0 | 0 | 0 |
+
+- **Brisbane vs Sydney and Melbourne**: Brisbane reaches 13 countries directly, behind Sydney (19) and Melbourne (15). With one stop the gap almost disappears: 67 countries, against 84 and 77.
+- **One stop changes everything**: even Adelaide, with only 4 direct countries, can reach 56 with one connection. A hub airport matters more than the number of direct flights.
+- **Zeros are not a bug**: Canberra, Hobart and Darwin had no international flights in late 2022, so they can only reach places by connecting through another Australian city. Hobart and Darwin show 0 because no connection appears in this data.
+
+> **Note:** "1 stop only" and "direct" can both include the same country. For example, you can fly directly to Los Angeles but need a stop to reach New York, so the US appears in both.
+
+### Method
+
+1. Download the OpenSky monthly flight lists for October and November 2022 (about 6 million flights).
+2. Keep only airline-style flights (callsigns like QFA15), which drops private, military and unidentified flights, and flights without a known origin and destination airport.
+3. Treat each pair of airports as a route if it has at least 8 flights over the two months, and assume every route works in both directions.
+4. Match each airport to a country using the OurAirports ISO country code, and place it in a country polygon for shading.
+5. For each departure city, the direct destinations are its connected airports. The one-stop destinations are the airports connected to those, which have no direct flight from the departure city.
+6. Bundle the data and the React app into a single HTML file with `esbuild`.
+
+### Data, limitations & tools
+
+- **Flights**: [OpenSky Network](https://zenodo.org/records/7923702) observed flights (ADS-B), October and November 2022. This is the newest free bulk release I could find that covers every route. The older OpenFlights route file is from 2014.
+- **Airports**: [OurAirports](https://ourairports.com/data/). **Borders**: Natural Earth via `world-atlas`. **Satellite imagery**: Esri World Imagery.
+- **Observed, not scheduled**: origin and destination airports are inferred from each flight's track, so a few pairs will be wrong or missing. ADS-B receivers are run by volunteers, so coverage is thinner over oceans, Africa and parts of Asia.
+- **Not today's timetable**: late 2022 was still the post-COVID recovery. Routes added or dropped since are not reflected, so today's counts will be higher.
+- **One stop is only a connection**: any two routes that share an airport count. Layover time, separate tickets, visas and baggage transfers are ignored. Domestic hubs, such as flying via Sydney, count as stops.
+- **Countries** follow the ISO code, so territories such as Guam or New Caledonia count as separate countries.
+- **Tools**: React, d3 (great-circle arcs and distances), MapLibre GL JS (globe), `topojson-client`, `esbuild`.
+- **Code**: [day10_app/](day10_app/). `node prep_opensky.mjs` turns the OpenSky and OurAirports files (in `data/day10_opensky/`) into JSON, and `node build.mjs` bundles everything into [maps/day10_flights.html](maps/day10_flights.html).
+- **Prompt**: [scripts/Day10_prompt_only.md](scripts/Day10_prompt_only.md).
