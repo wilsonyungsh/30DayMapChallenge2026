@@ -306,7 +306,7 @@ function App() {
     <div className="app">
       <aside>
         <h1>Where is your one-stop vacation?</h1>
-        <div className="year">Flight data: October 2022</div>
+        <div className="year">Flight data: Oct to Nov 2022</div>
         <p className="sub">Real airline routes from {NAME[origin]} ({origin}): direct, or with one stop.</p>
 
         <div className="group"><label>Departure city</label>
@@ -339,9 +339,9 @@ function App() {
         <div className="note">
           <h2>Data source &amp; limitations</h2>
           <ul>
-            <li><b>Source:</b> <a href="https://zenodo.org/records/7923702" target="_blank" rel="noreferrer">OpenSky Network</a> observed flights (ADS-B), October 2022, the newest free bulk release. Airports from <a href="https://ourairports.com/data/" target="_blank" rel="noreferrer">OurAirports</a>. Borders: Natural Earth via world-atlas.</li>
-            <li><b>Observed, not scheduled:</b> a route is any airport pair with at least {data.meta.minFlights} airline-style flights in the month. Private, military and unidentified flights are dropped. Origin and destination are inferred from each flight's track, so a few wrong or missing pairs are expected.</li>
-            <li><b>Not today's timetable:</b> the data is one month, October 2022, still during the post-COVID recovery (Darwin, Canberra and Hobart had no international flights then). Routes added since (and routes that have stopped) are not reflected, and the counts are likely lower than today's.</li>
+            <li><b>Source:</b> <a href="https://zenodo.org/records/7923702" target="_blank" rel="noreferrer">OpenSky Network</a> observed flights (ADS-B), Oct to Nov 2022, the newest free bulk release. Airports from <a href="https://ourairports.com/data/" target="_blank" rel="noreferrer">OurAirports</a>. Borders: Natural Earth via world-atlas.</li>
+            <li><b>Observed, not scheduled:</b> a route is any airport pair with at least {data.meta.minFlights} airline-style flights in the two months. Private, military and unidentified flights are dropped. Origin and destination are inferred from each flight's track, so a few wrong or missing pairs are expected.</li>
+            <li><b>Not today's timetable:</b> the data covers October and November 2022, still during the post-COVID recovery (Darwin, Canberra and Hobart had no international flights then). Routes added since (and routes that have stopped) are not reflected, and the counts are likely lower than today's.</li>
             <li><b>Coverage gaps:</b> ADS-B receivers are volunteer-run, so flights over oceans, Africa and parts of Asia are caught less often, and some real routes fall below the threshold.</li>
             <li><b>Globe:</b> lines are great-circle arcs drawn on a MapLibre globe, so they show shape, not actual flight paths.</li>
             <li><b>Return flights assumed:</b> a route A to B is treated as also B to A.</li>
@@ -359,7 +359,7 @@ function App() {
         {flying && view === 'cockpit' && (
           <div className="cockpit"><i className="pl" /><i className="pr" /><i className="dash" />
             <div className="hud"><b>HDG {String(Math.round(fly.h ?? 0)).padStart(3, '0')}°</b><span>{fly.text}</span></div></div>)}
-        <div className="badge">Routes observed October 2022</div>
+        <div className="badge">Routes observed Oct to Nov 2022</div>
         <div className="legend">
           {showD && <span><i className="sw d" /> Direct destination</span>}
           {showO && <span><i className="sw o" /> Final destination after 1 stop (line = transfer to destination)</span>}

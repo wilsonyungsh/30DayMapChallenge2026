@@ -6,7 +6,7 @@ import * as d3 from 'd3';
 import { feature } from 'topojson-client';
 const dir = '../data/day10_opensky/';
 const FILES = fs.readdirSync(dir).filter((f) => /^flightlist_.*\.csv\.gz$/.test(f)).sort();
-const MIN_FLIGHTS = 4; // min observed flights (both directions) over the month to count as a route
+const MIN_FLIGHTS = 8; // min observed flights (both directions) over the month to count as a route
 const SCHEDULED = /^[A-Z]{3}\d{1,4}[A-Z]{0,2}$/; // airline-style callsign, e.g. QFA15. Drops private/GA/military.
 
 // ICAO -> airport (only airports with an IATA code and scheduled service)
