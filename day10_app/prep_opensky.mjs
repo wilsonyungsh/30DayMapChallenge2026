@@ -34,6 +34,24 @@ for (const f of FILES) {
   console.log(f, 'done');
 }
 const edges = [...counts].filter(([, n]) => n >= MIN_FLIGHTS).map(([k]) => k.split('|'));
+// Cairns (YBCS) has no records in the OpenSky files (no ADS-B coverage there), so its routes come from
+// the older OpenFlights route file (2014), keeping only airports already in the OpenSky network.
+const SUPPLEMENT = { YBCS: 'CNS' };
+const byIata = new Map([...apt].map(([icao, r]) => [r.iata_code, icao]));
+const inNet = new Set(edges.flat());
+const supplement = {};
+const of = d3.csvParseRows(fs.readFileSync('../data/day10/routes.dat', 'utf8'));
+for (const [icao, iata] of Object.entries(SUPPLEMENT)) {
+  apt.set(icao, apt.get(icao));
+  const others = new Set();
+  for (const r of of) {
+    if (r[7] !== '0' || (r[2] !== iata && r[4] !== iata)) continue;
+    const o = byIata.get(r[2] === iata ? r[4] : r[2]);
+    if (o && inNet.has(o) && o !== icao) others.add(o);
+  }
+  others.forEach((o) => edges.push([icao, o]));
+  supplement[iata] = others.size;
+}
 const used = [...new Set(edges.flat())];
 const names = new Intl.DisplayNames(['en'], { type: 'region' });
 const world = JSON.parse(fs.readFileSync('node_modules/world-atlas/countries-110m.json', 'utf8'));
@@ -49,7 +67,7 @@ const out = {
     return [a.iata, a.name, a.city, a.country, +a.lat.toFixed(3), +a.lon.toFixed(3), f ? +f.id : -1];
   }),
   routes: edges.map(([s, d]) => [pos.get(s), pos.get(d)]),
-  meta: { files: FILES, minFlights: MIN_FLIGHTS, rows: total, kept },
+  meta: { supplement, files: FILES, minFlights: MIN_FLIGHTS, rows: total, kept },
 };
 fs.writeFileSync('src/data.json', JSON.stringify(out));
 console.log(out.airports.length, 'airports', out.routes.length, 'routes', out.meta);

@@ -10,7 +10,7 @@ import './style.css';
 
 const ORIGINS = [
   ['SYD', 'Sydney'], ['MEL', 'Melbourne'], ['BNE', 'Brisbane'], ['PER', 'Perth'],
-  ['ADL', 'Adelaide'], ['CBR', 'Canberra'], ['HBA', 'Hobart'], ['DRW', 'Darwin'],
+  ['ADL', 'Adelaide'], ['CBR', 'Canberra'], ['HBA', 'Hobart'], ['DRW', 'Darwin'], ['CNS', 'Cairns'],
 ];
 const NAME = Object.fromEntries(ORIGINS);
 const A = data.airports.map(([iata, name, city, country, lat, lon, cid]) => ({ iata, name, city, country, lat, lon, cid }));
@@ -19,26 +19,32 @@ const adj = A.map(() => new Set());
 data.routes.forEach(([s, d]) => { adj[s].add(d); adj[d].add(s); });
 const countries = feature(world, world.objects.countries).features.filter((f) => f.id !== '010');
 
-function reach(code) {
+const isAU = (i) => A[i].country === 'Australia';
+const adjDom = adj.map((set, i) => (isAU(i) ? new Set([...set].filter(isAU)) : new Set()));
+function reach(code, graph) {
   const o = IDX.get(code);
   if (o === undefined) return { o, direct: new Set(), one: new Map() };
-  const direct = new Set(adj[o]);
+  const direct = new Set(graph[o]);
   const one = new Map(); // final destination -> transfer airports[]
-  for (const v of direct) for (const d of adj[v]) {
+  for (const v of direct) for (const d of graph[v]) {
     if (d === o || direct.has(d)) continue;
     if (!one.has(d)) one.set(d, []);
     one.get(d).push(v);
   }
   return { o, direct, one };
 }
-const REACH = Object.fromEntries(ORIGINS.map(([c]) => [c, reach(c)]));
-const intl = (i) => A[i].country !== 'Australia';
+// intl: destinations outside Australia (transfers can be anywhere). dom: both legs inside Australia.
+const REACH = { intl: Object.fromEntries(ORIGINS.map(([c]) => [c, reach(c, adj)])), dom: Object.fromEntries(ORIGINS.map(([c]) => [c, reach(c, adjDom)])) };
+const inScope = (scope, i) => (scope === 'dom' ? isAU(i) : !isAU(i));
 // mode 0 = direct, 1 = direct + 1 stop, 2 = 1 stop only
-function stats(r, mode) {
-  const ids = [...(mode < 2 ? r.direct : []), ...(mode > 0 ? r.one.keys() : [])].filter(intl);
-  return { airports: ids.length, countries: new Set(ids.map((i) => A[i].country)).size };
+function stats(r, mode, scope) {
+  const ids = [...(mode < 2 ? r.direct : []), ...(mode > 0 ? r.one.keys() : [])].filter((i) => inScope(scope, i));
+  const countries = new Set(ids.map((i) => A[i].country)).size;
+  return { airports: ids.length, countries, n: scope === 'dom' ? ids.length : countries };
 }
-const STATS = Object.fromEntries(ORIGINS.map(([c]) => [c, [0, 1, 2].map((m) => stats(REACH[c], m))]));
+const STATS = Object.fromEntries(['intl', 'dom'].map((sc) => [sc, Object.fromEntries(ORIGINS.map(([c]) => [c, [0, 1, 2].map((m) => stats(REACH[sc][c], m, sc))]))]));
+const AU_TOTAL = A.filter((_, i) => isAU(i)).length - 1;
+const home = (scope, o) => (scope === 'dom' ? { center: [134, -27], zoom: 2.8 } : { center: [o.lon - 25, 5], zoom: 1.9 });
 
 // Great-circle arc as lon/lat points, unwrapped so it never jumps across the antimeridian.
 const arcCache = new Map();
@@ -91,38 +97,40 @@ function App() {
   const [fly, setFly] = useState(null);
   const [basemap, setBasemap] = useState('map');
   const [view, setView] = useState('follow');
+  const [scope, setScope] = useState('intl');
   const viewRef = useRef('follow');
   const anim = useRef({}), hoverId = useRef(null);
   const box = useRef(), map = useRef(), marker = useRef();
 
-  useEffect(() => setPin(null), [origin, steps]);
+  useEffect(() => setPin(null), [origin, steps, scope]);
   useEffect(() => {
     stopFly();
-    const vs = pin !== null ? REACH[origin].one.get(pin) : null;
+    const vs = pin !== null ? REACH[scope][origin].one.get(pin) : null;
     if (!vs) return setViaSel(null);
     const sc = (v) => d3.geoDistance([o0.lon, o0.lat], [A[v].lon, A[v].lat]) + d3.geoDistance([A[v].lon, A[v].lat], [A[pin].lon, A[pin].lat]);
     setViaSel([...vs].sort((a, b) => sc(a) - sc(b))[0]);
-  }, [pin, origin]);
+  }, [pin, origin, scope]);
 
-  const r = REACH[origin];
+  const r = REACH[scope][origin];
   const o0 = A[r.o];
-  const st = STATS[origin];
+  const st = STATS[scope][origin];
+  const dom = scope === 'dom';
   const showD = steps < 2, showO = steps > 0;
   const o = A[r.o];
   const pinVia = pin !== null ? r.one.get(pin) : null;
   const list = useMemo(() => {
     const m = new Map();
     const add = (i, kind) => {
-      if (!intl(i)) return;
-      const c = A[i].country;
+      if (!inScope(scope, i)) return;
+      const c = dom ? A[i].city : A[i].country;
       if (!m.has(c)) m.set(c, { c, d: 0, o: 0 });
       m.get(c)[kind]++;
     };
     if (showD) r.direct.forEach((i) => add(i, 'd'));
     if (showO) r.one.forEach((_, i) => add(i, 'o'));
     return [...m.values()].sort((a, b) => (b.d > 0) - (a.d > 0) || b.d - a.d || b.o - a.o || a.c.localeCompare(b.c));
-  }, [r, steps]);
-  const max = Math.max(...ORIGINS.map(([c]) => STATS[c][steps].countries));
+  }, [r, steps, scope]);
+  const max = Math.max(1, ...ORIGINS.map(([c]) => STATS[scope][c][steps].n));
 
   // create the globe once
   useEffect(() => {
@@ -130,7 +138,7 @@ function App() {
     const m = new maplibregl.Map({
       container: box.current,
       style: { version: 8, projection: { type: 'globe' }, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': sea } }] },
-      center: [REACH.BNE && A[REACH.BNE.o].lon - 25, 5], zoom: 1.9, minZoom: 0.8, maxZoom: 12, maxPitch: 85,
+      center: home('intl', A[REACH.intl.BNE.o]).center, zoom: 1.9, minZoom: 0.8, maxZoom: 12, maxPitch: 85,
       attributionControl: { compact: true, customAttribution: 'Flights: OpenSky Network · Airports: OurAirports · Borders: Natural Earth' },
     });
     map.current = m;
@@ -204,8 +212,8 @@ function App() {
   useEffect(() => {
     if (!ready) return;
     const m = map.current;
-    const dIds = new Set(showD ? [...r.direct].filter(intl).map((i) => A[i].cid) : []);
-    const oIds = new Set(showO ? [...r.one.keys()].filter(intl).map((i) => A[i].cid) : []);
+    const dIds = new Set(showD ? [...r.direct].filter((i) => inScope(scope, i)).map((i) => A[i].cid) : []);
+    const oIds = new Set(showO ? [...r.one.keys()].filter((i) => inScope(scope, i)).map((i) => A[i].cid) : []);
     m.getSource('countries').setData(fc(countries.map((f) => ({ ...f, properties: { cls: dIds.has(+f.id) ? 'd' : oIds.has(+f.id) ? 'o' : 'n' } }))));
     const dim = pin !== null;
     // departure -> transfer / direct destination
@@ -227,21 +235,21 @@ function App() {
     if (showD) r.direct.forEach((i) => dots.push({ type: 'Feature', properties: { i, k: 'd', pin: i === pin }, geometry: { type: 'Point', coordinates: [A[i].lon, A[i].lat] } }));
     if (showO) r.one.forEach((_, i) => dots.push({ type: 'Feature', properties: { i, k: 'o', pin: i === pin }, geometry: { type: 'Point', coordinates: [A[i].lon, A[i].lat] } }));
     m.getSource('dots').setData(fc(dots));
-  }, [ready, origin, steps, pin, viaSel]);
+  }, [ready, origin, steps, pin, viaSel, scope]);
 
   useEffect(() => {
     if (!ready) return;
     marker.current.setLngLat([o.lon, o.lat]);
     marker.current.getElement().textContent = o.city;
-    map.current.easeTo({ center: [o.lon - 25, 5], zoom: 1.9, duration: 1200 });
-  }, [ready, origin]);
+    map.current.easeTo({ ...home(scope, o), duration: 1200 });
+  }, [ready, origin, scope]);
 
   function stopFly(reset) {
     cancelAnimationFrame(anim.current.raf);
     anim.current.raf = 0;
     const m = map.current;
     if (m && m.getSource('plane')) m.getSource('plane').setData(fc([]));
-    if (m && anim.current.active) m.easeTo({ pitch: 0, bearing: 0, ...(reset ? { center: [o0.lon - 25, 5], zoom: 1.9 } : {}), duration: 1000 });
+    if (m && anim.current.active) m.easeTo({ pitch: 0, bearing: 0, ...(reset ? home(scope, o0) : {}), duration: 1000 });
     anim.current.active = false;
     setFly(null);
   }
@@ -311,6 +319,10 @@ function App() {
 
         <div className="group"><label>Departure city</label>
           <div className="seg wrap">{ORIGINS.map(([c, n]) => <button key={c} className={origin === c ? 'on' : ''} onClick={() => setOrigin(c)}>{n}</button>)}</div></div>
+        <div className="group"><label>Destinations</label>
+          <div className="seg">
+            <button className={scope === 'intl' ? 'on' : ''} onClick={() => setScope('intl')}>International</button>
+            <button className={scope === 'dom' ? 'on' : ''} onClick={() => setScope('dom')}>Domestic only</button></div></div>
         <div className="group"><label>Stops</label>
           <div className="seg">
             <button className={steps === 0 ? 'on' : ''} onClick={() => setSteps(0)}>Direct only</button>
@@ -318,21 +330,25 @@ function App() {
             <button className={steps === 2 ? 'on' : ''} onClick={() => setSteps(2)}>1 stop only</button></div></div>
 
         <div className="hero">
-          <div className="big"><b>{st[steps].countries}</b><span>countries</span></div>
-          <div className="big"><b>{st[steps].airports}</b><span>airports</span></div>
+          {dom ? <>
+            <div className="big"><b>{st[steps].airports}</b><span>Australian airports</span></div>
+            <div className="big"><b>{Math.round((st[steps].airports / AU_TOTAL) * 100)}%</b><span>of the domestic network</span></div></> : <>
+            <div className="big"><b>{st[steps].countries}</b><span>countries</span></div>
+            <div className="big"><b>{st[steps].airports}</b><span>airports</span></div></>}
         </div>
-        <p className="line">From {NAME[origin]} you can reach <b>{st[0].countries} countries</b> ({st[0].airports} airports) directly
-          {steps > 0 && <>, and <b>{st[2].countries} countries</b> ({st[2].airports} airports) that need exactly one stop{steps === 1 && <> ({st[1].countries} countries in total)</>}</>}. Australia itself is not counted.</p>
+        <p className="line">{dom ? <>From {NAME[origin]} you can fly directly to <b>{st[0].airports} Australian airports</b>
+          {steps > 0 && <>, and to <b>{st[2].airports} more</b> with exactly one stop{steps === 1 && <> ({st[1].airports} in total)</>}</>}. Both flights stay inside Australia.</> : <>From {NAME[origin]} you can reach <b>{st[0].countries} countries</b> ({st[0].airports} airports) directly
+          {steps > 0 && <>, and <b>{st[2].countries} countries</b> ({st[2].airports} airports) that need exactly one stop{steps === 1 && <> ({st[1].countries} countries in total)</>}</>}. Australia itself is not counted.</>}</p>
 
-        <h2>Compare capital cities <small>{['direct', 'up to 1 stop', '1 stop only'][steps]}, countries</small></h2>
+        <h2>Compare cities <small>{['direct', 'up to 1 stop', '1 stop only'][steps]}, {dom ? 'airports' : 'countries'}</small></h2>
         <ul className="bars">{ORIGINS.map(([c, n]) => (
           <li key={c} className={c === origin ? 'sel' : ''} onClick={() => setOrigin(c)}>
             <span className="n">{n}</span>
-            <span className="track"><i style={{ width: `${(STATS[c][steps].countries / max) * 100}%` }} /></span>
-            <span className="v">{STATS[c][steps].countries}</span>
+            <span className="track"><i style={{ width: `${(STATS[scope][c][steps].n / max) * 100}%` }} /></span>
+            <span className="v">{STATS[scope][c][steps].n}</span>
           </li>))}</ul>
 
-        <h2>Countries reachable from {NAME[origin]}</h2>
+        <h2>{dom ? 'Cities' : 'Countries'} reachable from {NAME[origin]}</h2>
         <div className="chips">{list.map((x) => (
           <span key={x.c} className={x.d ? 'chip d' : 'chip o'}>{x.c}<em>{x.d ? x.d : ''}</em></span>))}</div>
 
@@ -344,9 +360,11 @@ function App() {
             <li><b>Not today's timetable:</b> the data covers October and November 2022, still during the post-COVID recovery (Darwin, Canberra and Hobart had no international flights then). Routes added since (and routes that have stopped) are not reflected, and the counts are likely lower than today's.</li>
             <li><b>Coverage gaps:</b> ADS-B receivers are volunteer-run, so flights over oceans, Africa and parts of Asia are caught less often, and some real routes fall below the threshold.</li>
             <li><b>Globe:</b> lines are great-circle arcs drawn on a MapLibre globe, so they show shape, not actual flight paths.</li>
+            <li><b>Domestic only:</b> both flights of a one-stop trip stay inside Australia. State capitals and regional airports only appear if airline-style flights were seen there.</li>
+            <li><b>Cairns:</b> OpenSky has no flight records for Cairns airport, so its routes come from the older OpenFlights file (2014) and may be out of date. They connect to airports that appear in the 2022 data.</li>
             <li><b>Return flights assumed:</b> a route A to B is treated as also B to A.</li>
             <li><b>One stop means one connection:</b> "1 stop only" lists airports with no direct flight but a one-connection route.  any two routes sharing an airport. Layover time, separate tickets, visas and baggage transfers are ignored, and domestic hubs (e.g. via Sydney) count as stops.</li>
-<li><b>Countries</b> follow the airport's ISO country code (OurAirports)' so territories (e.g. Guam, Réunion) count as separate countries.</li>
+<li><b>Countries</b> follow the airport's ISO country code (OurAirports), so territories (e.g. Guam, Réunion) count as separate countries.</li>
           </ul>
         </div>
       </aside>

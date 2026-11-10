@@ -318,10 +318,11 @@ The result is a 3D globe (MapLibre GL JS) where you pick an Australian capital c
 
 ### What's on the map
 
-- **Departure city**: Sydney, Melbourne, Brisbane, Perth, Adelaide, Canberra, Hobart or Darwin.
+- **Departure city**: Sydney, Melbourne, Brisbane, Perth, Adelaide, Canberra, Hobart, Darwin or Cairns.
+- **Destinations**: *International* (the default) or *Domestic only*, where both flights of a one-stop trip stay inside Australia.
 - **Stops**: *Direct only*, *Up to 1 stop*, or *1 stop only* (places with no direct flight but a one-connection route).
 - **Statistics**: how many countries and airports you can reach, in a sentence such as "from Brisbane you can reach 13 countries directly".
-- **City comparison**: a bar chart ranks all eight capitals for the stop option you chose. Click a bar to switch cities.
+- **City comparison**: a bar chart ranks all nine cities for the stop option you chose. Click a bar to switch cities.
 - **Blue and amber lines**: blue lines run from the departure city to a direct destination or a transfer airport, and amber lines run from the transfer airport to the final destination. I deliberately don't draw departure to final destination, because that is not how you would fly.
 - **Hover**: airports glow and a tooltip shows the airport, the country and where you would transfer.
 - **Fly this route**: click an airport, press the button and a small plane flies the route. If there are several transfer options you can choose one.
@@ -330,7 +331,7 @@ The result is a 3D globe (MapLibre GL JS) where you pick an Australian capital c
 
 ### The comparison in numbers
 
-Countries reachable from each capital (Australia itself not counted), October and November 2022:
+Countries reachable from each city (Australia itself not counted), October and November 2022:
 
 | From | Direct | 1 stop only | Up to 1 stop |
 | ---- | -----: | ----------: | -----------: |
@@ -342,6 +343,23 @@ Countries reachable from each capital (Australia itself not counted), October an
 | Canberra | 0 | 21 | 21 |
 | Hobart | 0 | 0 | 0 |
 | Darwin | 0 | 0 | 0 |
+| Cairns* | 3 | 36 | 37 |
+
+*Cairns has no flights in the OpenSky data, so its routes come from the 2014 OpenFlights file (see the limitations).
+
+Domestic only, Australian airports reachable (one stop means both flights stay in Australia):
+
+| From | Direct | 1 stop only |
+| ---- | -----: | ----------: |
+| Sydney | 24 | 13 |
+| Melbourne | 13 | 24 |
+| Brisbane | 14 | 22 |
+| Perth | 11 | 25 |
+| Adelaide | 15 | 21 |
+| Canberra | 8 | 28 |
+| Cairns* | 6 | 29 |
+
+With one stop almost the whole domestic network (36 airports) is reachable from every city that has any flights in the data, so the interesting domestic number is the direct one.
 
 - **Brisbane vs Sydney and Melbourne**: Brisbane reaches 13 countries directly, behind Sydney (19) and Melbourne (15). With one stop the gap almost disappears: 67 countries, against 84 and 77.
 - **One stop changes everything**: even Adelaide, with only 4 direct countries, can reach 56 with one connection. A hub airport matters more than the number of direct flights.
@@ -365,6 +383,7 @@ Countries reachable from each capital (Australia itself not counted), October an
 - **Observed, not scheduled**: origin and destination airports are inferred from each flight's track, so a few pairs will be wrong or missing. ADS-B receivers are run by volunteers, so coverage is thinner over oceans, Africa and parts of Asia.
 - **Not today's timetable**: late 2022 was still the post-COVID recovery. Routes added or dropped since are not reflected, so today's counts will be higher.
 - **One stop is only a connection**: any two routes that share an airport count. Layover time, separate tickets, visas and baggage transfers are ignored. Domestic hubs, such as flying via Sydney, count as stops.
+- **Cairns is patched**: OpenSky has no flight records for Cairns airport (no ADS-B coverage), so its 10 routes come from the older OpenFlights file (2014) and only link to airports that appear in the 2022 data. Treat Cairns as indicative.
 - **Countries** follow the ISO code, so territories such as Guam or New Caledonia count as separate countries.
 - **Tools**: React, d3 (great-circle arcs and distances), MapLibre GL JS (globe), `topojson-client`, `esbuild`.
 - **Code**: [day10_app/](day10_app/). `node prep_opensky.mjs` turns the OpenSky and OurAirports files (in `data/day10_opensky/`) into JSON, and `node build.mjs` bundles everything into [maps/day10_flights.html](maps/day10_flights.html).
