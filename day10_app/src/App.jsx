@@ -89,6 +89,9 @@ function App() {
   const [ready, setReady] = useState(false);
   const [viaSel, setViaSel] = useState(null);
   const [fly, setFly] = useState(null);
+  const [basemap, setBasemap] = useState('map');
+  const [view, setView] = useState('follow');
+  const viewRef = useRef('follow');
   const anim = useRef({}), hoverId = useRef(null);
   const box = useRef(), map = useRef(), marker = useRef();
 
@@ -127,7 +130,7 @@ function App() {
     const m = new maplibregl.Map({
       container: box.current,
       style: { version: 8, projection: { type: 'globe' }, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': sea } }] },
-      center: [REACH.BNE && A[REACH.BNE.o].lon - 25, 5], zoom: 1.9, minZoom: 0.8, maxZoom: 6,
+      center: [REACH.BNE && A[REACH.BNE.o].lon - 25, 5], zoom: 1.9, minZoom: 0.8, maxZoom: 12, maxPitch: 85,
       attributionControl: { compact: true, customAttribution: 'Flights: OpenSky Network · Airports: OurAirports · Borders: Natural Earth' },
     });
     map.current = m;
@@ -136,6 +139,8 @@ function App() {
       ['countries', 'legs1', 'legs2', 'pin', 'plane'].forEach(src);
       m.addSource('dots', { type: 'geojson', data: fc([]), promoteId: 'i' });
       m.addImage('a380', a380Icon(), { pixelRatio: 2 });
+      m.addSource('esri', { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, maxzoom: 17, attribution: 'Imagery © Esri, Maxar, Earthstar Geographics' });
+      m.addLayer({ id: 'sat', type: 'raster', source: 'esri', layout: { visibility: 'none' } });
       m.addLayer({ id: 'countries', type: 'fill', source: 'countries', paint: { 'fill-color': ['match', ['get', 'cls'], 'd', css('--dl'), 'o', css('--ol'), css('--land')] } });
       m.addLayer({ id: 'borders', type: 'line', source: 'countries', paint: { 'line-color': css('--panel'), 'line-width': 0.5 } });
       m.addLayer({ id: 'legs1', type: 'line', source: 'legs1', paint: { 'line-color': css('--d'), 'line-width': 0.8, 'line-opacity': ['case', ['get', 'dim'], 0.08, 0.45] } });
@@ -172,6 +177,28 @@ function App() {
     });
     return () => m.remove();
   }, []);
+
+  // map / satellite basemap
+  useEffect(() => {
+    if (!ready) return;
+    const m = map.current, sat = basemap === 'sat';
+    m.setLayoutProperty('sat', 'visibility', sat ? 'visible' : 'none');
+    m.setPaintProperty('countries', 'fill-opacity', ['match', ['get', 'cls'], 'n', sat ? 0 : 1, sat ? 0.3 : 1]);
+    m.setPaintProperty('borders', 'line-color', sat ? 'rgba(255,255,255,0.45)' : css('--panel'));
+    m.setPaintProperty('legs1', 'line-color', sat ? '#7cc4ff' : css('--d'));
+    m.setPaintProperty('legs2', 'line-color', sat ? '#ffc24d' : css('--o'));
+  }, [ready, basemap]);
+
+  // follow / cockpit camera
+  const flying = fly !== null;
+  useEffect(() => {
+    viewRef.current = view;
+    if (!ready) return;
+    const m = map.current, cock = view === 'cockpit' && flying;
+    m.setLayoutProperty('plane', 'visibility', cock ? 'none' : 'visible');
+    const l = anim.current.last;
+    if (flying && l) m.jumpTo(cock ? { center: l.p, bearing: l.h, pitch: 76, zoom: 5.4 } : { center: l.p, bearing: 0, pitch: 0, zoom: 3.4 });
+  }, [ready, view, flying]);
 
   // refresh map data whenever the selection changes
   useEffect(() => {
@@ -214,7 +241,8 @@ function App() {
     anim.current.raf = 0;
     const m = map.current;
     if (m && m.getSource('plane')) m.getSource('plane').setData(fc([]));
-    if (reset && m) m.easeTo({ center: [o0.lon - 25, 5], zoom: 1.9, duration: 1200 });
+    if (m && anim.current.active) m.easeTo({ pitch: 0, bearing: 0, ...(reset ? { center: [o0.lon - 25, 5], zoom: 1.9 } : {}), duration: 1000 });
+    anim.current.active = false;
     setFly(null);
   }
   function startFly() {
@@ -240,10 +268,14 @@ function App() {
     };
     const put = ({ p, h }) => {
       m.getSource('plane').setData(fc([{ type: 'Feature', properties: { h }, geometry: { type: 'Point', coordinates: p } }]));
-      m.jumpTo({ center: p });
+      anim.current.last = { p, h };
+      m.jumpTo(viewRef.current === 'cockpit' ? { center: p, bearing: h, pitch: 76, zoom: 5.4 } : { center: p });
     };
     const city = (i) => `${A[i].city} (${A[i].iata})`;
-    m.easeTo({ center: ll(r.o), zoom: 3.4, duration: 1000 });
+    anim.current.active = true; setTip(null);
+    const h0 = at(0, 0).h, cock0 = viewRef.current === 'cockpit';
+    m.setLayoutProperty('plane', 'visibility', cock0 ? 'none' : 'visible');
+    m.easeTo(cock0 ? { center: ll(r.o), zoom: 5.4, pitch: 76, bearing: h0, duration: 1000 } : { center: ll(r.o), zoom: 3.4, duration: 1000 });
     { const { p, h } = at(0, 0); m.getSource('plane').setData(fc([{ type: 'Feature', properties: { h }, geometry: { type: 'Point', coordinates: p } }])); }
     setFly({ prog: 0, text: `Boarding at ${city(r.o)}` });
     const start = performance.now() + 1100;
@@ -254,7 +286,7 @@ function App() {
         const seg = tl.find((s) => e >= s.t0 && e < s.t1);
         if (!seg) {
           put(at(legs.length - 1, 1));
-          setFly({ prog: 1, done: true, text: `Landed in ${city(dest)}` });
+          setFly({ prog: 1, done: true, h: anim.current.last.h, text: `Landed in ${city(dest)}` });
           return;
         }
         const f = seg.dwell ? 1 : (e - seg.t0) / (seg.t1 - seg.t0);
@@ -262,7 +294,7 @@ function App() {
         const prog = Math.round((e / t) * 100);
         if (prog !== last) {
           last = prog;
-          setFly({ prog: prog / 100, text: seg.dwell ? `Transfer in ${city(viaSel)}` : `Flying to ${city(legs[seg.i][1])}` });
+          setFly({ prog: prog / 100, h: anim.current.last.h, text: seg.dwell ? `Transfer in ${city(viaSel)}` : `Flying to ${city(legs[seg.i][1])}` });
         }
       }
       anim.current.raf = requestAnimationFrame(tick);
@@ -321,6 +353,12 @@ function App() {
 
       <main>
         <div ref={box} className="map" />
+        <div className="seg basemap">
+          <button className={basemap === 'map' ? 'on' : ''} onClick={() => setBasemap('map')}>Map</button>
+          <button className={basemap === 'sat' ? 'on' : ''} onClick={() => setBasemap('sat')}>Satellite</button></div>
+        {flying && view === 'cockpit' && (
+          <div className="cockpit"><i className="pl" /><i className="pr" /><i className="dash" />
+            <div className="hud"><b>HDG {String(Math.round(fly.h ?? 0)).padStart(3, '0')}°</b><span>{fly.text}</span></div></div>)}
         <div className="badge">Routes observed October 2022</div>
         <div className="legend">
           {showD && <span><i className="sw d" /> Direct destination</span>}
@@ -336,6 +374,9 @@ function App() {
                 <label className="via">Transfer at <select value={viaSel ?? ''} onChange={(e) => setViaSel(+e.target.value)}>
                   {pinVia.map((v) => <option key={v} value={v}>{A[v].city} ({A[v].iata})</option>)}</select></label>)}
               {pinVia && pinVia.length === 1 && <span className="via">Transfer at {A[pinVia[0]].city} ({A[pinVia[0]].iata})</span>}
+              <span className="seg mini">
+                <button className={view === 'follow' ? 'on' : ''} onClick={() => setView('follow')}>Follow</button>
+                <button className={view === 'cockpit' ? 'on' : ''} onClick={() => setView('cockpit')}>Cockpit</button></span>
               {!fly && <button className="fly" onClick={startFly}>✈ Fly this route</button>}
               {fly && <><span className="via">{fly.text}</span><progress value={fly.prog} max="1" />
                 <button className="fly" onClick={startFly}>{fly.done ? 'Replay' : 'Restart'}</button>

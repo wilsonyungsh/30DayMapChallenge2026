@@ -39,3 +39,13 @@ main{display:block}
 .flyrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}.via{font-size:12px;color:var(--mute)}.via select{margin-left:4px;font:inherit}
 .fly{border:0;border-radius:999px;background:var(--d);color:#fff;padding:5px 12px;font:inherit;font-weight:600;cursor:pointer}.fly.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .flyrow progress{width:120px;height:8px}
+.basemap{position:absolute;right:12px;top:58px;background:var(--panel);z-index:2}.basemap button{flex:none;padding:5px 12px}
+.seg.mini{display:inline-flex}.seg.mini button{padding:4px 10px;font-size:12px}
+.cockpit{position:absolute;inset:0;pointer-events:none;z-index:1;
+ box-shadow:inset 0 70px 60px -30px #05080d,inset 0 0 0 2px #05080d}
+.cockpit .dash{position:absolute;left:0;right:0;bottom:0;height:20%;background:linear-gradient(#0b1018cc,#05080d 55%);border-top:3px solid #1b2634;clip-path:polygon(0 30%,18% 0,82% 0,100% 30%,100% 100%,0 100%)}
+.cockpit .pl,.cockpit .pr{position:absolute;top:0;bottom:0;width:11%;background:linear-gradient(90deg,#05080d 55%,transparent)}
+.cockpit .pl{left:0;clip-path:polygon(0 0,60% 0,100% 100%,0 100%)}.cockpit .pr{right:0;transform:scaleX(-1);clip-path:polygon(0 0,60% 0,100% 100%,0 100%)}
+.cockpit .hud{position:absolute;left:50%;bottom:4%;transform:translateX(-50%);display:flex;gap:14px;align-items:center;color:#9dffb0;font:600 13px ui-monospace,monospace;text-shadow:0 0 6px #2be37a}
+.cockpit .hud span{color:#cfe3f3}
+.pinbox{z-index:3}.tip{z-index:9}

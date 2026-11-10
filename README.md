@@ -312,7 +312,7 @@ An interactive globe built with React, d3 and MapLibre GL JS from real observed 
 
 - **Open**: [maps/day10_flights.html](maps/day10_flights.html) (self-contained, no server needed).
 - **Questions it answers**: how many countries you can fly to directly from Brisbane, how that compares with Sydney and Melbourne (and the other capitals), and where one stop gets you.
-- **Hover and fly**: airports glow on hover. Click one and press "Fly this route" to watch a small plane follow the route (choose the transfer airport if there are several) while the camera tracks it.
+- **Hover and fly**: airports glow on hover. Click one and press "Fly this route" to watch a small plane follow the route (choose the transfer airport if there are several) while the camera tracks it. Switch between a **Follow** camera and a first-person **Cockpit** view (with a heading readout), and between a **Map** and a **Satellite** basemap (Esri World Imagery tiles, needs internet).
 - **One-stop lines**: blue lines are departure to transfer airport, amber lines are transfer airport to final destination. Click a dot to see its connections.
 - **Source**: [OpenSky Network](https://zenodo.org/records/7923702) observed flights (October 2022), airports from [OurAirports](https://ourairports.com/data/), borders from Natural Earth via `world-atlas`.
 - **Limitations**: one month of 2022 data (post-COVID recovery), a route is any airport pair with 4 or more airline-style flights, ADS-B coverage is patchy, and a one-stop trip ignores layover times, separate tickets and visas.
