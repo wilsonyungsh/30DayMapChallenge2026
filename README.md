@@ -305,3 +305,15 @@ So the line between urban and rural in Taiwan is a **legal line**, not a measure
 - **Spatial processing**: `sf`, `dplyr`, `httr`.
 - **Mapping**: [`mapgl`](https://walker-data.com/mapgl/) (MapLibre GL JS) in R, exported with `htmlwidgets`. The summary table is a custom control with inline event handlers for dragging and collapsing.
 - **Script**: [scripts/Day9_Urban_vs_Rural.R](scripts/Day9_Urban_vs_Rural.R). It downloads all the data and builds the map. The shapefile zips use Big5 file names that R's `unzip()` can't read, so the script unzips with macOS `ditto`.
+
+## Day 10 - Prompt only: Where is your one-stop vacation?
+
+An interactive globe built with React, d3 and MapLibre GL JS from real observed flight data. Pick an Australian capital city and choose direct flights, up to one stop, or one stop only, and the globe shows every country and airport you can reach.
+
+- **Open**: [maps/day10_flights.html](maps/day10_flights.html) (self-contained, no server needed).
+- **Questions it answers**: how many countries you can fly to directly from Brisbane, how that compares with Sydney and Melbourne (and the other capitals), and where one stop gets you.
+- **Hover and fly**: airports glow on hover. Click one and press "Fly this route" to watch a small plane follow the route (choose the transfer airport if there are several) while the camera tracks it.
+- **One-stop lines**: blue lines are departure to transfer airport, amber lines are transfer airport to final destination. Click a dot to see its connections.
+- **Source**: [OpenSky Network](https://zenodo.org/records/7923702) observed flights (October 2022), airports from [OurAirports](https://ourairports.com/data/), borders from Natural Earth via `world-atlas`.
+- **Limitations**: one month of 2022 data (post-COVID recovery), a route is any airport pair with 4 or more airline-style flights, ADS-B coverage is patchy, and a one-stop trip ignores layover times, separate tickets and visas.
+- **Build**: source in [day10_app/](day10_app/). `node prep_opensky.mjs` turns the OpenSky and OurAirports files (in `data/day10_opensky/`) into JSON, and `node build.mjs` bundles everything into the single HTML file.
